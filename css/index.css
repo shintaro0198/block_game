@@ -1,0 +1,8 @@
+div{
+  margin: auto;
+  margin-top: 40px;
+  width: 400px;
+}
+canvas{
+  background-color: rgba(25, 25, 25, 0.9);
+}

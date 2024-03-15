@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/destyle.css">
+  <link rel="stylesheet" href="css/index.css">
+  <title>Document</title>
+</head>
+
+<body>
+  <div>
+    <canvas id="canvas" width="500px" height="350px">あ</canvas>
+    <button onclick="start()">start</button>
+    <button onclick="stop()">stop</button>
+    <button onclick="speedUp()">speedup</button>
+    <button onclick="neutral()">1x</button>
+    <button onclick="slow()">slow</button>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let home = true
+    canvas.addEventListener('click', () => {
+      if (home) {
+        if (event.offsetX >= 210 && event.offsetX <= 290 && event.offsetY >= 135 && event.offsetY <= 215) {
+          start();
+        }
+      }
+    })
+    const ball = {
+      x: 250,
+      y: 300,
+      radius: 10,
+      xMove: 5,
+      yMove: 5,
+      xJudge: true,
+      yJudge: true,
+      draw: function () {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+        ctx.fill();
+      }
+    }
+    const bar = {
+      x: 210,
+      y: 320,
+      width: 80,
+      height: 10,
+      draw: function () {
+        ctx.fillRect(this.x, this.y, 80, 10);
+      },
+      move: function () {
+        canvas.addEventListener('mousemove', () => {
+          if (event.offsetX < this.x) {
+            this.x -= 12;
+          } else if (event.offsetX > this.x) {
+            this.x += 12;
+          }
+        });
+        window.addEventListener('keydown', (e) => {
+          let key = e.key;
+          if (key == "Right" || key == "ArrowRight") {
+            this.x += 40;
+          } else if (key === 'Left' || key === 'ArrowLeft') {
+            this.x -= 40;
+          }
+        })
+      }
+    }
+    let rectList = [];
+    let count = 0;
+    let score = 0;
+    function rectangle() {
+      for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 5; j++) {
+          let rect = {
+            number: count,
+            x: 10 + i * 48,
+            y: 20 + j * 20,
+            score: 10,
+            width: 40,
+            height: 10,
+            draw: function () {
+              ctx.fillRect(this.x, this.y, this.width, this.height)
+            },
+          };
+          count++;
+          rectList.push(rect);
+        }
+      };
+    }
+    rectangle();
+    function draw() {
+      ctx.fillStyle = 'white';
+      ctx.save();
+      ctx.fillStyle = 'rgba(15, 30, 255, 0.5)';
+      rectList.forEach((rect) => {
+        rect.draw();
+      })
+      ctx.restore();
+      bar.draw();
+      ctx.strokeStyle = 'white';
+      ctx.beginPath();
+      ctx.moveTo(0, 320);
+      ctx.lineTo(500, 320);
+      ctx.stroke();
+      ball.draw();
+      ctx.font = "30px serif";
+      ctx.fillText(score, 50, 300);
+    };
+    function blockCheck() {
+      rectList.forEach((rect) => {
+        if (rect.x <= ball.x + ball.radius + ball.xMove && ball.x + ball.radius <= rect.x && rect.y <= ball.y + ball.radius && ball.y - ball.radius <= rect.y + rect.height) {
+          ball.xJudge = true;
+          score += rect.score;
+          rectList = rectList.filter((a) => a.number !== rect.number)
+        } else if (rect.x + rect.width <= ball.x - ball.radius && ball.x - ball.radius - ball.xMove <= rect.x + rect.width && rect.y <= ball.y + ball.radius && ball.y - ball.radius <= rect.y + rect.height) {
+          ball.xJudge = false;
+          score += rect.score;
+          rectList = rectList.filter((a) => a.number !== rect.number)
+        }
+        else if (ball.y + ball.radius + ball.yMove === rect.y && rect.x <= ball.x + ball.radius && ball.x - ball.radius <= rect.x + rect.width) {
+          ball.yJudge = true;
+          score += rect.score;
+          rectList = rectList.filter((a) => a.number !== rect.number)
+        } else if (ball.y - ball.radius - ball.yMove === rect.y + rect.height && rect.x <= ball.x + ball.radius && ball.x - ball.radius <= rect.x + rect.width) {
+          ball.yJudge = false;
+          score += rect.score;
+          rectList = rectList.filter((a) => a.number !== rect.number)
+        }
+      });
+    };
+    function barCheck() {
+      if (bar.x - ball.radius <= ball.x && ball.x <= bar.x + bar.width + ball.radius && ball.y >= bar.y - ball.radius) {
+        switch (true) {
+          case bar.x <= ball.x + ball.radius && ball.x + ball.radius <= bar.x + bar.width / 4:
+            ball.xMove = ball.yMove;
+            ball.xJudge = true;
+            break;
+          case bar.x + bar.width / 4 < ball.x + ball.radius && ball.x + ball.radius <= bar.x + bar.width / 2:
+            ball.xMove = ball.yMove / 2;
+            ball.xJudge = true;
+            break;
+          case bar.x + bar.width / 2 < ball.x + ball.radius && ball.x + ball.radius <= bar.x + bar.width / 4 * 3:
+            ball.xMove = ball.yMove / 2;
+            ball.xJudge = false;
+            break;
+          case bar.x + bar.width / 4 * 3 < ball.x + ball.radius && ball.x - ball.radius <= bar.x + bar.width:
+            ball.xMove = ball.yMove;
+            ball.xJudge = false;
+            break;
+        }
+        ball.yJudge = !ball.yJudge;
+      }
+    }
+    function wallCheck() {
+      if (ball.x <= 0 || ball.x >= 500 - ball.radius) {
+        ball.xJudge = !ball.xJudge;
+      };
+      if (ball.y <= 0 || ball.y >= 350 - ball.radius) {
+        ball.yJudge = !ball.yJudge;
+      };
+    }
+    function reflection() {
+      if (ball.xJudge) {
+        ball.x -= ball.xMove;
+      } else {
+        ball.x += ball.xMove;
+      };
+      if (ball.yJudge) {
+        ball.y -= ball.yMove;
+      } else {
+        ball.y += ball.yMove;
+      }
+    }
+    function reset() {
+      bar.x = 210;
+      bar.y = 320;
+      ball.x = 250;
+      ball.y = 300;
+      ball.xMove = 5;
+      ball.yMove = 5;
+      ball.xJudge = true;
+      ball.yJudge = true;
+      count = 0;
+      rectList = [];
+      rectangle();
+      score = 0;
+    }
+    function startIcon() {
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(250, 175, 40, 0, Math.PI * 2, true);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(60,60,60,0.9)';
+      ctx.beginPath();
+      ctx.moveTo(235, 155);
+      ctx.lineTo(235, 195);
+      ctx.lineTo(270, 175);
+      ctx.fill()
+    }
+    function gameOver() {
+      ctx.font = '50px serif'
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over', canvas.width / 2, 75);
+      startIcon();
+      reset();
+      home = !home;
+      ctx.globalAlpha = 0.2;
+      console.log(ball.y);
+    };
+    function gameClear() {
+      ctx.font = '50px serif'
+      ctx.textAlign = 'center';
+      ctx.fillText('Clear!!!', canvas.width / 2, 75);
+      startIcon();
+      reset();
+      home = !home;
+      ctx.globalAlpha = 0.2;
+      console.log(ball.y);
+
+    }
+    function start() {
+      ctx.reset();
+      home = !home
+      draw();
+      let a = 0;
+      function gameStart() {
+        blockCheck();
+        /*__________バー判定______________*/
+        barCheck();
+        /*_____壁判定______*/
+        wallCheck();
+        /*________反射__________*/
+        reflection();
+        ctx.clearRect(0, 0, 500, 350);
+        if (ball.y <= 320 - ball.radius) {
+          if (rectList.length !== 0) {
+            requestAnimationFrame(gameStart);
+          } else {
+            gameClear();
+          };
+        } else {
+          gameOver();
+        };
+        draw();
+      };
+      gameStart();
+    };
+    function stop() {
+      ball.xMove = 0;
+      ball.yMove = 0;
+    };
+    function speedUp() {
+      ball.xMove += 5;
+      ball.yMove += 5;
+    };
+    window.addEventListener('keydown', (e) => {
+      if (e.keyCode === 32) {
+        if (ball.xMove === 0) {
+          slow();
+        } else {
+          stop();
+          console.log('stop')
+        }
+      }
+    })
+    function neutral() {
+      ball.xMove = 5;
+      ball.yMove = 5;
+    };
+    function slow() {
+      ball.xMove = 2.5;
+      ball.yMove = 2.5;
+    }
+    ctx.clearRect(0, 0, 500, 350);
+    ctx.font = '50px serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'white';
+    ctx.fillText('Start', canvas.width / 2, 75);
+    startIcon();
+    bar.move();
+  </script>
+</body>
+
+</html>
