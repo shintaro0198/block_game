@@ -6,3 +6,11 @@ div{
 canvas{
   background-color: rgba(25, 25, 25, 0.9);
 }
+button{
+  text-align: center;
+  padding: 0 20px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 2px;
+  background-color: skyblue;
+}
