@@ -94,7 +94,7 @@
     function draw() {
       ctx.fillStyle = 'white';
       ctx.save();
-      ctx.fillStyle = 'rgba(15, 30, 255, 0.5)';
+      ctx.fillStyle = 'white';
       rectList.forEach((rect) => {
         rect.draw();
       })
@@ -106,7 +106,7 @@
       ctx.lineTo(500, 320);
       ctx.stroke();
       ball.draw();
-      ctx.font = "30px serif";
+      ctx.font = "30px yu gothic";
       ctx.fillText(score, 50, 300);
     };
     function blockCheck() {
@@ -278,7 +278,7 @@
     ctx.font = '50px serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'white';
-    ctx.fillText('Start', canvas.width / 2, 75);
+    ctx.fillText('ブロック崩し', canvas.width / 2, 75);
     startIcon();
     bar.move();
   </script>

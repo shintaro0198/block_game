@@ -1,7 +1,7 @@
 div{
   margin: auto;
   margin-top: 40px;
-  width: 400px;
+  width: 500px;
 }
 canvas{
   background-color: rgba(25, 25, 25, 0.9);
@@ -13,4 +13,5 @@ button{
   line-height: 30px;
   border-radius: 2px;
   background-color: skyblue;
+  font-family: 'yu gothic';
 }
